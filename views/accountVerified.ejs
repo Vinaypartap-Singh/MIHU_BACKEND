@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verification</title>
+    <title>Account Verified</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,18 +40,11 @@
             color: #777;
         }
 
-        .otp-section {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-        }
-
-        .otp {
+        .success-message {
             font-weight: bold;
             font-size: 18px;
             color: #4CAF50;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -59,20 +52,16 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>Welcome, <%= name %>!</h1>
+            <h1>Account Verified!</h1>
         </div>
         <div class="content">
             <p>Dear <%= name %>,</p>
-            <p>Thank you for joining our community! To complete your registration, please verify your email address
-                using the OTP provided below. The OTP is valid for 10 Minutes</p>
-            <div class="otp-section">
-                <p>Your OTP is: <span class="otp">
-                        <%= otp %>
-                    </span></p>
+            <p>Your account has been successfully verified. Welcome to our community!</p>
+            <p>We are thrilled to have you on board. If you have any questions or need assistance, feel free to contact
+                our support team.</p>
+            <div class="success-message">
+                Thank you for verifying your email!
             </div>
-            <p>If you didn't create an account with us, please ignore this email.</p>
-            <p>We are thrilled to have you as part of our community. If you have any questions, feel free to contact our
-                support team.</p>
         </div>
         <div class="footer">
             <p>&copy; 2024 Your Company. All Rights Reserved.</p>

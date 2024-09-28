@@ -4,6 +4,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import ejs from "ejs";
+import routeHandler from "./routes/index.js";
 
 // Setup
 const app = express();
@@ -19,6 +20,9 @@ app.set("view engine", "ejs");
 // EJS Path
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.set("views", path.resolve(__dirname, "./views"));
+
+// Handle Routes
+app.use(routeHandler);
 
 app.get("/", async (req, res) => {
   const ejsFile = await ejs.renderFile(__dirname + `/views/emailVerify.ejs`);
