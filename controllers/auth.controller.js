@@ -181,7 +181,6 @@ authHandler.post("/resend-otp", async (req, res) => {
     }
 
     const otpExpiryDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
-    // Generate OTP
     const newOtp = Math.floor(100000 + Math.random() * 900000);
 
     await prisma.user.update({
@@ -276,6 +275,7 @@ authHandler.post("/login", async (req, res) => {
   }
 });
 
+// Get User Information
 authHandler.get("/user", authMiddleware, async (req, res) => {
   try {
     const userCheck = req.user;

@@ -46,3 +46,31 @@ export const loginSchemaValidation = z.object({
     .string({ message: "Password is required" })
     .min(6, { message: "password must be 6 characters" }),
 });
+
+export const passwordResetRequestValidation = z.object({
+  email: z.string({
+    message: "Email is required",
+  }),
+});
+
+export const passwordResetVerificationValidation = z
+  .object({
+    email: z
+      .string({ message: "Email is required" })
+      .email({ message: "please use the correct email" }),
+    otp: z
+      .number()
+      .int({ message: "OTP must be a number." })
+      .min(100000, { message: "OTP must be at least 6 digits." })
+      .max(999999, { message: "OTP must be at most 6 digits." }), // Ensures it is a six-digit OTP
+    password: z
+      .string({ message: "Password is required" })
+      .min(6, { message: "password must be 6 characters" }),
+    confirmPassword: z
+      .string({ message: "Confirm Password is required" })
+      .min(6, { message: "must be same as password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password does not match.",
+    path: ["confirmPassword"],
+  });
