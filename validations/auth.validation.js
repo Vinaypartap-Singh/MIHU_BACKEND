@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 
 export const registerSchemaValidation = z
   .object({
@@ -74,3 +74,13 @@ export const passwordResetVerificationValidation = z
     message: "Password does not match.",
     path: ["confirmPassword"],
   });
+
+export const twoFAToggleSchemaValidation = z.object({
+  action: z.enum(["enable", "disable"]),
+});
+
+export const twoFAEmailSchema = z.object({
+  twoFAEmail: string({ message: "Email is required" }).email({
+    message: "Please enter valid Email",
+  }),
+});
