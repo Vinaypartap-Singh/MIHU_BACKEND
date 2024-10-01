@@ -77,6 +77,12 @@ export const passwordResetVerificationValidation = z
 
 export const twoFAToggleSchemaValidation = z.object({
   action: z.enum(["enable", "disable"]),
+  forceDisable: z
+    .literal(true)
+    .optional()
+    .refine((data) => data === true, {
+      message: "Expected False Value",
+    }),
 });
 
 export const twoFAEmailSchema = z.object({
@@ -95,3 +101,25 @@ export const twoFAVerifySchema = z.object({
     .min(100000, { message: "OTP must be at least 6 digits." })
     .max(999999, { message: "OTP must be at most 6 digits." }), // Ensures it is a six-digit OTP
 });
+
+export const passwordResetVerificationValidation2FA = z
+  .object({
+    email: z
+      .string({ message: "Email is required" })
+      .email({ message: "please use the correct email" }),
+    otp: z
+      .number()
+      .int({ message: "OTP must be a number." })
+      .min(100000, { message: "OTP must be at least 6 digits." })
+      .max(999999, { message: "OTP must be at most 6 digits." }), // Ensures it is a six-digit OTP
+    password: z
+      .string({ message: "Password is required" })
+      .min(6, { message: "password must be 6 characters" }),
+    confirmPassword: z
+      .string({ message: "Confirm Password is required" })
+      .min(6, { message: "must be same as password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password does not match.",
+    path: ["confirmPassword"],
+  });

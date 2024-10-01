@@ -14,21 +14,24 @@ datasource db {
 }
 
 model User {
-  id                       String    @id @default(auto()) @map("_id") @db.ObjectId
-  name                     String
-  email                    String    @unique
-  password                 String
-  profileImage             String?
-  enableTwoFactorEmail     Boolean   @default(false)
-  twoFactorEmail           String?
-  twoFactorEmailOTP        Int?
-  twoFactorEmailOTPExpiry  DateTime?
-  isTwoFactorEmailVerified Boolean   @default(false)
-  emailVerifyOtp           Int?
-  emailVerified            Boolean   @default(false)
-  emailVerifyOtpExpiry     DateTime?
-  passwordResetOtp         Int?
-  passwordResetOtpExpiry   DateTime?
-  createdAt                DateTime  @default(now())
-  updatedAt                DateTime  @updatedAt
+  id                        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                      String
+  email                     String    @unique
+  password                  String
+  profileImage              String?
+  enableTwoFactorEmail      Boolean   @default(false)
+  twoFactorEmail            String?
+  twoFactorEmailOTP         Int?
+  twoFactorEmailOTPExpiry   DateTime?
+  isTwoFactorEmailVerified  Boolean   @default(false)
+  forceTwoFactorDisable     Boolean   @default(false)
+  emailVerifyOtp            Int?
+  emailVerified             Boolean   @default(false)
+  emailVerifyOtpExpiry      DateTime?
+  passwordResetOtp          Int?
+  passwordResetOtpExpiry    DateTime?
+  passwordResetOtp2FA       Int?
+  passwordResetOtpExpiry2FA DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
 }

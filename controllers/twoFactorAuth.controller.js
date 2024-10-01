@@ -38,6 +38,65 @@ twoFAHandler.post("/toggle", authMiddleware, async (req, res) => {
       );
     }
 
+    if (user.twoFactorEmail && user.isTwoFactorEmailVerified) {
+      return handleTryResponseError(
+        res,
+        401,
+        "An email already added to your account and verified."
+      );
+    }
+
+    if (user.twoFactorEmail && !user.isTwoFactorEmailVerified) {
+      return handleTryResponseError(
+        res,
+        401,
+        "An email already added to your account and not verified."
+      );
+    }
+
+    if (payload.forceDisable !== true) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Expected Disable Value to disable 2fa email"
+      );
+    }
+
+    if (payload.forceDisable) {
+      if (user.twoFactorEmail && user.isTwoFactorEmailVerified) {
+        await prisma.user.update({
+          where: {
+            email: user_id.email,
+          },
+          data: {
+            enableTwoFactorEmail: false,
+            forceTwoFactorDisable: true,
+          },
+        });
+        return handleTryResponseError(
+          res,
+          200,
+          "Your verified email for two factor authentication disabled and will not be used for resetting password and account recovery."
+        );
+      } else if (user.twoFactorEmail && !user.isTwoFactorEmailVerified) {
+        await prisma.user.update({
+          where: {
+            email: user_id.email,
+          },
+          data: {
+            enableTwoFactorEmail: false,
+            forceTwoFactorDisable: true,
+          },
+        });
+
+        return handleTryResponseError(
+          res,
+          200,
+          "Your unverified two factor email has been disabled. Verify your email when you enable two factor auth"
+        );
+      }
+    }
+
     const new2FaStatus = payload.action === "enable" ? true : false;
 
     if (user.enableTwoFactorEmail === new2FaStatus) {
@@ -98,11 +157,35 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
       );
     }
 
-    if (user.twoFactorEmail !== null) {
+    // check whether this email used by another one or not
+
+    const check_user_2fa_email_exist = await prisma.user.findUnique({
+      where: {
+        twoFactorEmail: payload.twoFAEmail,
+      },
+    });
+
+    if (check_user_2fa_email_exist) {
       return handleTryResponseError(
         res,
         401,
-        "Two Factor Authentication Email Already Exist. Please use that one"
+        "This email is already by someone else please use another email."
+      );
+    }
+
+    if (user.twoFactorEmail !== null && user.isTwoFactorEmailVerified) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Two Factor Authentication Email Already Exist and Verified. Please use that one"
+      );
+    }
+
+    if (user.twoFactorEmail !== null && !user.isTwoFactorEmailVerified) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Two Factor Authentication Email Already Exist and not Verified.Please verify your existing email"
       );
     }
 
