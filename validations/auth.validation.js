@@ -84,3 +84,14 @@ export const twoFAEmailSchema = z.object({
     message: "Please enter valid Email",
   }),
 });
+
+export const twoFAVerifySchema = z.object({
+  twoFAEmail: string({ message: "Email is required" }).email({
+    message: "Please enter valid Email",
+  }),
+  otp: z
+    .number()
+    .int({ message: "OTP must be a number." })
+    .min(100000, { message: "OTP must be at least 6 digits." })
+    .max(999999, { message: "OTP must be at most 6 digits." }), // Ensures it is a six-digit OTP
+});

@@ -172,6 +172,14 @@ authHandler.post("/resend-otp", async (req, res) => {
       );
     }
 
+    if (payload.email !== user.email) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Invalid Email Please check your email"
+      );
+    }
+
     if (new Date() < user.emailVerifyOtpExpiry) {
       return handleTryResponseError(
         res,
@@ -284,6 +292,18 @@ authHandler.get("/user", authMiddleware, async (req, res) => {
       where: {
         email: userCheck.email,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profileImage: true,
+        enableTwoFactorEmail: true,
+        twoFactorEmail: true,
+        isTwoFactorEmailVerified: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!user) {
@@ -291,9 +311,7 @@ authHandler.get("/user", authMiddleware, async (req, res) => {
     }
 
     const payload = {
-      email: user.email,
-      name: user.name,
-      emailVerified: user.emailVerified,
+      ...user,
     };
 
     return handleTryResponseError(res, 200, "User Information", payload);

@@ -9,22 +9,21 @@ import prisma from "../db/db.config.js";
 import {
   twoFAEmailSchema,
   twoFAToggleSchemaValidation,
+  twoFAVerifySchema,
 } from "../validations/auth.validation.js";
 import { sendMail } from "../config/mail.js";
 
 const twoFAHandler = Router();
 
-// Enable Disable Two Factor Authentication
+// Enable/Disable Two-Factor Authentication
 twoFAHandler.post("/toggle", authMiddleware, async (req, res) => {
   try {
-    const user_id = req.user.id;
+    const user_id = req.user;
     const body = req.body;
     const payload = twoFAToggleSchemaValidation.parse(body);
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
+      where: { email: user_id.email },
     });
 
     if (!user) {
@@ -35,47 +34,48 @@ twoFAHandler.post("/toggle", authMiddleware, async (req, res) => {
       return handleTryResponseError(
         res,
         401,
-        "Please verify your email in order to two factor authentication"
+        "Please verify your email to enable two-factor authentication."
       );
     }
 
     const new2FaStatus = payload.action === "enable" ? true : false;
 
+    if (user.enableTwoFactorEmail === new2FaStatus) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Two Factor Authentication Already Enabled/Disabled"
+      );
+    }
+
     await prisma.user.update({
-      where: {
-        email: user.email,
-      },
-      data: {
-        enableTwoFactorEmail: new2FaStatus,
-      },
+      where: { email: user.email },
+      data: { enableTwoFactorEmail: new2FaStatus },
     });
 
     return handleTryResponseError(
       res,
       200,
-      "Two Factor Authentication Updated"
+      "Two-Factor Authentication Updated Successfully."
     );
   } catch (error) {
     return handleCatchError(
       error,
       res,
-      "Error while Enabling / Disabling Two Factor Authentication"
+      "Error while enabling/disabling Two-Factor Authentication."
     );
   }
 });
 
-// Add Two Factor Authentication Email
-
+// Add Two-Factor Authentication Email
 twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
   try {
-    // Get two fa email from body
-    const user_id = req.user.id;
+    const user_id = req.user;
     const body = req.body;
     const payload = twoFAEmailSchema.parse(body);
-    const user = await prisma.user.finUnique({
-      where: {
-        id: user_id,
-      },
+
+    const user = await prisma.user.findUnique({
+      where: { email: user_id.email },
     });
 
     if (!user) {
@@ -86,7 +86,7 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
       return handleTryResponseError(
         res,
         401,
-        "Please Verify Your Email In order Add Two Factor Email"
+        "Please verify your email to add a Two-Factor Authentication email."
       );
     }
 
@@ -94,49 +94,125 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
       return handleTryResponseError(
         res,
         401,
-        "Please enable Two Factor Authentication in order to add two factor email"
+        "Enable Two-Factor Authentication before adding a Two-Factor email."
       );
     }
 
-    // OTP EXPIRY
-    const otpExpiryDuration = 10 * 60 * 1000; // 5 minutes in milliseconds
-    // Generate OTP
+    if (user.twoFactorEmail !== null) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Two Factor Authentication Email Already Exist. Please use that one"
+      );
+    }
+
+    // OTP expiry set to 10 minutes
+    const otpExpiryDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    //  Send Email
-    const htmlEmailReponse = await renderEmailEjs("verifyTwoFA", {
+    // Send Email
+    const htmlEmailResponse = await renderEmailEjs("verifyTwoFA", {
       name: user.name,
-      otp: otp,
+      otp,
     });
 
-    await sendMail(payload.email, "Email Verification OTP", htmlEmailReponse);
+    await sendMail(payload.email, "Email Verification OTP", htmlEmailResponse);
 
     await prisma.user.update({
-      where: {
-        email: user.email,
-      },
+      where: { email: user.email },
       data: {
-        twoFactorEmail: payload.twoFAEmail,
-        twoFactorEmailOTP: new Date(Date.now() + otpExpiryDuration),
+        twoFactorEmail: payload.email,
+        twoFactorEmailOTP: otp,
+        twoFactorEmailOTPExpiry: new Date(Date.now() + otpExpiryDuration),
       },
     });
 
     return handleTryResponseError(
       res,
       200,
-      "Verification Email Sent on Your Two Factor Email"
+      "Verification email sent to your Two-Factor email."
     );
   } catch (error) {
     return handleCatchError(
       error,
       res,
-      "Unable To Add Two Factor Email Please Check"
+      "Unable to add Two-Factor email. Please check your details."
     );
   }
 });
 
-// Verify Two Factor Email
+// Verify Two-Factor Authentication Email
+twoFAHandler.post("/verifyEmail", authMiddleware, async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const body = req.body;
+    const payload = twoFAVerifySchema.parse(body);
 
-twoFAHandler.post("/verifyEmail", authMiddleware, async (req, res) => {});
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+    });
+
+    if (!user) {
+      return handleTryResponseError(res, 401, "Unauthorized Access");
+    }
+
+    if (!user.emailVerified) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Please verify your email before adding a Two-Factor email."
+      );
+    }
+
+    if (!user.enableTwoFactorEmail) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Enable Two-Factor Authentication before verifying the Two-Factor email."
+      );
+    }
+
+    if (payload.email !== user.twoFactorEmail) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Invalid email. Please check your details."
+      );
+    }
+
+    if (user.twoFactorEmailOTP !== payload.otp) {
+      return handleTryResponseError(res, 401, "Invalid OTP.");
+    }
+
+    if (new Date() > user.twoFactorEmailOTPExpiry) {
+      return handleTryResponseError(
+        res,
+        401,
+        "OTP has expired. Please request a new one."
+      );
+    }
+
+    await prisma.user.update({
+      where: { email: payload.email },
+      data: {
+        twoFactorEmailOTP: null,
+        twoFactorEmailOTPExpiry: null,
+        isTwoFactorEmailVerified: true,
+      },
+    });
+
+    return handleTryResponseError(
+      res,
+      200,
+      "Your Two-Factor Authentication email has been verified."
+    );
+  } catch (error) {
+    return handleCatchError(
+      error,
+      res,
+      "Error while verifying Two-Factor Authentication email."
+    );
+  }
+});
 
 export default twoFAHandler;

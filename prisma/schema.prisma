@@ -21,7 +21,8 @@ model User {
   profileImage             String?
   enableTwoFactorEmail     Boolean   @default(false)
   twoFactorEmail           String?
-  twoFactorEmailOTP        String?
+  twoFactorEmailOTP        Int?
+  twoFactorEmailOTPExpiry  DateTime?
   isTwoFactorEmailVerified Boolean   @default(false)
   emailVerifyOtp           Int?
   emailVerified            Boolean   @default(false)
