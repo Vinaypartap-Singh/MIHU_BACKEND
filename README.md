@@ -1,3 +1,4 @@
+
 # MIHU Backend API
 
 This repository contains the backend API for MIHU. The API is built to handle authentication, password management, and error handling efficiently.
@@ -21,6 +22,7 @@ This repository contains the backend API for MIHU. The API is built to handle au
 - **GET `/api/auth/user`**  
   Retrieve user information.
 
+
 ### Password Management Routes
 
 - **POST `/api/password/request-reset-password`**  
@@ -28,6 +30,13 @@ This repository contains the backend API for MIHU. The API is built to handle au
 
 - **POST `/api/password/reset-password`**  
   Verify the OTP and reset the user's password if verified.
+
+- **POST `/api/password/reset-request-password-2fa`**  
+  If Two-Factor Authentication (2FA) is enabled, this route sends a password reset request to the user's 2FA email (if available). This step ensures an additional layer of security for the user.
+
+- **POST `/api/password/reset-password-2fa`**  
+  This route is used to verify the OTP sent to the 2FA email and reset the user's password if the verification succeeds. This ensures that only the authenticated user with access to the 2FA email can change the password.
+  
 
 ## Error Handling
 
