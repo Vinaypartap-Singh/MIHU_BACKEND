@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication Verified</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #3e3e3e;
+        }
+
+        .email-container {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 0 auto;
+            width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            background-color: #4CAF50;
+            padding: 10px;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .success-message {
+            font-weight: bold;
+            font-size: 18px;
+            color: #4CAF50;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Two-Factor Authentication Verified!</h1>
+        </div>
+        <div class="content">
+            <p>Dear <%= name %>,</p>
+            <p>Your two-factor authentication has been successfully verified. Your account is now more secure!</p>
+            <p>We are thrilled to have you on board. If you have any questions or need assistance, feel free to contact
+                our support team.</p>
+            <div class="success-message">
+                Thank you for verifying your email and enabling two-factor authentication!
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 Your Company. All Rights Reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -106,6 +106,14 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
       );
     }
 
+    if (user.email === payload.twoFAEmail) {
+      return handleTryResponseError(
+        res,
+        401,
+        "Primary Email Cannot be added as Two Factor Email"
+      );
+    }
+
     // OTP expiry set to 10 minutes
     const otpExpiryDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -116,12 +124,16 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
       otp,
     });
 
-    await sendMail(payload.email, "Email Verification OTP", htmlEmailResponse);
+    await sendMail(
+      payload.twoFAEmail,
+      "Email Verification OTP",
+      htmlEmailResponse
+    );
 
     await prisma.user.update({
-      where: { email: user.email },
+      where: { email: user_id.email },
       data: {
-        twoFactorEmail: payload.email,
+        twoFactorEmail: payload.twoFAEmail,
         twoFactorEmailOTP: otp,
         twoFactorEmailOTPExpiry: new Date(Date.now() + otpExpiryDuration),
       },
@@ -142,14 +154,14 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
 });
 
 // Verify Two-Factor Authentication Email
-twoFAHandler.post("/verifyEmail", authMiddleware, async (req, res) => {
+twoFAHandler.post("/verify-email", authMiddleware, async (req, res) => {
   try {
-    const user_id = req.user.id;
+    const user_id = req.user;
     const body = req.body;
     const payload = twoFAVerifySchema.parse(body);
 
     const user = await prisma.user.findUnique({
-      where: { id: user_id },
+      where: { email: user_id.email },
     });
 
     if (!user) {
@@ -172,7 +184,7 @@ twoFAHandler.post("/verifyEmail", authMiddleware, async (req, res) => {
       );
     }
 
-    if (payload.email !== user.twoFactorEmail) {
+    if (payload.twoFAEmail !== user.twoFactorEmail) {
       return handleTryResponseError(
         res,
         401,
@@ -193,13 +205,23 @@ twoFAHandler.post("/verifyEmail", authMiddleware, async (req, res) => {
     }
 
     await prisma.user.update({
-      where: { email: payload.email },
+      where: { email: user_id.email },
       data: {
         twoFactorEmailOTP: null,
         twoFactorEmailOTPExpiry: null,
         isTwoFactorEmailVerified: true,
       },
     });
+
+    const emailverifiedHtml = await renderEmailEjs("twoFAEmailVerified", {
+      name: user.name,
+    });
+
+    await sendMail(
+      payload.twoFAEmail,
+      "Two Factor Email Verified",
+      emailverifiedHtml
+    );
 
     return handleTryResponseError(
       res,
