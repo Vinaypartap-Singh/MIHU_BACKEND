@@ -147,7 +147,7 @@ authHandler.post("/verify-email", async (req, res) => {
     return handleCatchError(
       error,
       res,
-      "Error while Verifying Email Using OTP"
+      `Error while Verifying Email Using OTP ${error}`
     );
   }
 });
@@ -175,7 +175,7 @@ authHandler.post("/resend-otp", async (req, res) => {
     if (payload.email !== user.email) {
       return handleTryResponseError(
         res,
-        401,
+        400,
         "Invalid Email Please check your email"
       );
     }
@@ -258,6 +258,7 @@ authHandler.post("/login", async (req, res) => {
     }
 
     const jwtPayload = {
+      id: user.id,
       email: user.email,
       name: user.name,
       verifiedEmail: user.emailVerified,
@@ -272,12 +273,59 @@ authHandler.post("/login", async (req, res) => {
       token: `Bearer ${token}`,
     };
 
+    console.log("Account Login Success");
+
     return handleTryResponseError(
       res,
       200,
       "Account login Success",
       responsePayload
     );
+  } catch (error) {
+    return handleCatchError(error, res, "Error while Login User");
+  }
+});
+
+// Check Login User
+authHandler.post("/check/credentials", async (req, res) => {
+  try {
+    const body = req.body;
+    const payload = loginSchemaValidation.parse(body);
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+
+    if (!user) {
+      return handleTryResponseError(
+        res,
+        400,
+        "User does not exist with this email. Please check your email."
+      );
+    }
+
+    if (!user.emailVerified) {
+      return handleTryResponseError(
+        res,
+        400,
+        "Please verify your account to login"
+      );
+    }
+
+    // check password
+
+    const verifyPassword = await bcrypt.compare(
+      payload.password,
+      user.password
+    );
+
+    if (!verifyPassword) {
+      return handleTryResponseError(res, 400, "Incorrect email or password");
+    }
+
+    return handleTryResponseError(res, 200, "Account login Success");
   } catch (error) {
     return handleCatchError(error, res, "Error while Login User");
   }
@@ -307,7 +355,7 @@ authHandler.get("/user", authMiddleware, async (req, res) => {
     });
 
     if (!user) {
-      return handleTryResponseError(res, 401, "Unauthorized Access");
+      return handleTryResponseError(res, 400, "Unauthorized Access");
     }
 
     const payload = {

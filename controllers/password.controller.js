@@ -6,6 +6,7 @@ import {
   renderEmailEjs,
 } from "../helper.js";
 import {
+  passwordChangeSchema,
   passwordResetRequestValidation,
   passwordResetVerificationValidation,
   passwordResetVerificationValidation2FA,
@@ -15,6 +16,78 @@ import { sendMail } from "../config/mail.js";
 import bcrypt from "bcryptjs";
 
 const passwordHandler = Router();
+
+// Change Password If User Remember old password
+
+passwordHandler.post("/change-password", authMiddleware, async (req, res) => {
+  try {
+    const user_id = req.user;
+    const body = req.body;
+    const payload = passwordChangeSchema.parse(body);
+    const user = await prisma.user.findUnique({
+      where: {
+        email: user_id.email,
+      },
+    });
+
+    if (!user) {
+      return handleTryResponseError(res, 400, "Unauthorized Access");
+    }
+
+    if (!user.emailVerified) {
+      return handleTryResponseError(
+        res,
+        400,
+        "Please verify your account first"
+      );
+    }
+
+    if (payload.password === payload.oldPassword) {
+      return handleTryResponseError(
+        res,
+        400,
+        "New password cannot be same as old password"
+      );
+    }
+
+    const verifyOldPassword = await bcrypt.compare(
+      payload.oldPassword,
+      user.password
+    );
+
+    if (!verifyOldPassword) {
+      return handleTryResponseError(
+        res,
+        400,
+        "Old Password is not correct. Try Again"
+      );
+    }
+
+    const salt = await bcrypt.genSalt(14);
+    payload.password = await bcrypt.hash(payload.password, salt);
+
+    await prisma.user.update({
+      where: {
+        email: user.email,
+      },
+      data: {
+        password: payload.password,
+      },
+    });
+
+    return handleTryResponseError(
+      res,
+      200,
+      "Your password updated successfully. use your new password to login"
+    );
+  } catch (error) {
+    return handleCatchError(
+      error,
+      res,
+      "Unable to Change Password Using Your Old Password"
+    );
+  }
+});
 
 // Request Reset Password using primary email
 passwordHandler.post(

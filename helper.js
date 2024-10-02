@@ -55,5 +55,8 @@ export const handleTryResponseError = (res, status, message, data) => {
 
   return res
     .status(status || 200)
-    .json({ message: message || "Common Try Response Error Handler" });
+    .json({
+      message: message || "Common Try Response Error Handler",
+      data: {},
+    });
 };

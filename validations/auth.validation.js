@@ -53,6 +53,18 @@ export const passwordResetRequestValidation = z.object({
   }),
 });
 
+export const passwordChangeSchema = z.object({
+  oldPassword: z
+    .string({ message: "Password is required" })
+    .min(6, { message: "password must be 6 characters" }),
+  password: z
+    .string({ message: "Password is required" })
+    .min(6, { message: "password must be 6 characters" }),
+  confirmPassword: z
+    .string({ message: "Confirm Password is required" })
+    .min(6, { message: "must be same as password" }),
+});
+
 export const passwordResetVerificationValidation = z
   .object({
     email: z
