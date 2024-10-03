@@ -90,76 +90,68 @@ passwordHandler.post("/change-password", authMiddleware, async (req, res) => {
 });
 
 // Request Reset Password using primary email
-passwordHandler.post(
-  "/request-reset-password",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const body = req.body;
-      const payload = passwordResetRequestValidation.parse(body);
+passwordHandler.post("/request-reset-password", async (req, res) => {
+  try {
+    const body = req.body;
+    const payload = passwordResetRequestValidation.parse(body);
 
-      const user = await prisma.user.findUnique({
-        where: {
-          email: payload.email,
-        },
-      });
+    const user = await prisma.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
 
-      if (!user) {
-        return handleTryResponseError(
-          res,
-          401,
-          "Unauthorized Access. User not Found"
-        );
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(
-          res,
-          400,
-          "Please verify your account to login"
-        );
-      }
-
-      const otpExpiryDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
-      const passwordResetOtp = Math.floor(100000 + Math.random() * 900000);
-
-      await prisma.user.update({
-        where: {
-          email: user.email,
-        },
-        data: {
-          passwordResetOtp: passwordResetOtp,
-          passwordResetOtpExpiry: new Date(Date.now() + otpExpiryDuration),
-        },
-      });
-
-      const passwordResetOtpEmail = await renderEmailEjs(
-        "passwordResetOtpRequest",
-        {
-          name: user.name,
-          otp: passwordResetOtp,
-        }
-      );
-
-      await sendMail(user.email, "Password Reset OTP", passwordResetOtpEmail);
-
+    if (!user) {
       return handleTryResponseError(
         res,
-        200,
-        "Password Reset OTP sent please check your mailbox"
-      );
-    } catch (error) {
-      return handleCatchError(
-        error,
-        res,
-        "Error while password reset request."
+        401,
+        "Unauthorized Access. User not Found"
       );
     }
+
+    if (!user.emailVerified) {
+      return handleTryResponseError(
+        res,
+        400,
+        "Please verify your account to login"
+      );
+    }
+
+    const otpExpiryDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
+    const passwordResetOtp = Math.floor(100000 + Math.random() * 900000);
+
+    await prisma.user.update({
+      where: {
+        email: user.email,
+      },
+      data: {
+        passwordResetOtp: passwordResetOtp,
+        passwordResetOtpExpiry: new Date(Date.now() + otpExpiryDuration),
+      },
+    });
+
+    const passwordResetOtpEmail = await renderEmailEjs(
+      "passwordResetOtpRequest",
+      {
+        name: user.name,
+        otp: passwordResetOtp,
+      }
+    );
+
+    await sendMail(user.email, "Password Reset OTP", passwordResetOtpEmail);
+
+    return handleTryResponseError(
+      res,
+      200,
+      "Password Reset OTP sent please check your mailbox"
+    );
+  } catch (error) {
+    return handleCatchError(error, res, "Error while password reset request.");
   }
-);
+});
 
 // Reset Password using primary email
-passwordHandler.post("/reset-password", authMiddleware, async (req, res) => {
+passwordHandler.post("/reset-password", async (req, res) => {
   try {
     const body = req.body;
     const payload = passwordResetVerificationValidation.parse(body);
