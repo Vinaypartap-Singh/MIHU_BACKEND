@@ -50,7 +50,7 @@ export const loginSchemaValidation = z.object({
 export const passwordResetRequestValidation = z.object({
   email: z.string({
     message: "Email is required",
-  }),
+  }).email({message: "Please use correct email"})
 });
 
 export const passwordChangeSchema = z.object({

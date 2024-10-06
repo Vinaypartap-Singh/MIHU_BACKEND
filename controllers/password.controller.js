@@ -104,7 +104,7 @@ passwordHandler.post("/request-reset-password", async (req, res) => {
     if (!user) {
       return handleTryResponseError(
         res,
-        401,
+        400,
         "Unauthorized Access. User not Found"
       );
     }
@@ -165,7 +165,7 @@ passwordHandler.post("/reset-password", async (req, res) => {
     if (!user) {
       return handleTryResponseError(
         res,
-        401,
+        400,
         "Unauthorized Access. User not Found"
       );
     }
@@ -185,7 +185,7 @@ passwordHandler.post("/reset-password", async (req, res) => {
     if (new Date() > user.passwordResetOtpExpiry) {
       return handleTryResponseError(
         res,
-        401,
+        400,
         "Otp expired please request new otp to reset password"
       );
     }
@@ -242,13 +242,13 @@ passwordHandler.post(
       });
 
       if (!user) {
-        return handleTryResponseError(res, 401, "Unauthorized Access");
+        return handleTryResponseError(res, 400, "Unauthorized Access");
       }
 
       if (!user.emailVerified) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Please verify your primary email in order to reset password"
         );
       }
@@ -256,7 +256,7 @@ passwordHandler.post(
       if (!user.enableTwoFactorEmail) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Two Factor authentication not enabled please enable and verify email in order to reset password using Two Factor Email"
         );
       }
@@ -264,7 +264,7 @@ passwordHandler.post(
       if (user.twoFactorEmail && !user.isTwoFactorEmailVerified) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Your Two factor auth email is not verified. Please verify your two factor auth email"
         );
       }
@@ -276,7 +276,7 @@ passwordHandler.post(
       ) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Your Two Factor Email Added and Verified but disabled by you. Please enable it to continue using two factor email"
         );
       }
@@ -288,7 +288,7 @@ passwordHandler.post(
       ) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Your Two Factor Email Added but not Verified and disabled by you. Please enable it to continue using two factor email"
         );
       }
@@ -347,13 +347,13 @@ passwordHandler.post(
       });
 
       if (!user) {
-        return handleTryResponseError(res, 401, "Unauthorized Access");
+        return handleTryResponseError(res, 400, "Unauthorized Access");
       }
 
       if (!user.emailVerified) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Your Account is not verified. Please verify"
         );
       }
@@ -361,7 +361,7 @@ passwordHandler.post(
       if (!user.isTwoFactorEmailVerified) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Your Two authentication email is not verified"
         );
       }
@@ -369,7 +369,7 @@ passwordHandler.post(
       if (user.forceTwoFactorDisable) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "You have disabled your two factor authentication email please enable and then use otp"
         );
       }
@@ -377,7 +377,7 @@ passwordHandler.post(
       if (new Date() > user.passwordResetOtpExpiry2FA) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Your otp has expired please use new otp"
         );
       }
@@ -385,7 +385,7 @@ passwordHandler.post(
       if (payload.email !== user.twoFactorEmail) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Please use correct email address given in two factor email"
         );
       }
@@ -393,7 +393,7 @@ passwordHandler.post(
       if (payload.otp !== user.passwordResetOtp2FA) {
         return handleTryResponseError(
           res,
-          401,
+          400,
           "Please use the correct otp. Check your inbox and type correct otp"
         );
       }
