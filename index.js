@@ -25,9 +25,7 @@ app.set("views", path.resolve(__dirname, "./views"));
 app.use(routeHandler);
 
 app.get("/", async (req, res) => {
-  const ejsFile = await ejs.renderFile(__dirname + `/views/emailVerify.ejs`);
-
-  res.send(ejsFile);
+  return res.json({ message: "Server is running" });
 });
 
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
