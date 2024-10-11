@@ -15,6 +15,8 @@ import {
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
+import { uploadOnCloudinary } from "../config/cloudinary.js";
 
 const authHandler = Router();
 
@@ -371,5 +373,68 @@ authHandler.get("/user", authMiddleware, async (req, res) => {
     );
   }
 });
+
+// Profile Upload Route Here
+
+authHandler.post(
+  "/profile-upload",
+  upload.single("profileImage"),
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const user_id = req.user;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: user_id,
+        },
+      });
+
+      if (!user) {
+        return handleTryResponseError(res, 400, "Unauthorized Access");
+      }
+
+      if (!user.emailVerified) {
+        return handleTryResponseError(
+          res,
+          400,
+          "Please verify your account in order to upload profile image"
+        );
+      }
+
+      const profileImageLocalPath = req.file.path;
+      const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+
+      if (!profileImage) {
+        return handleTryResponseError(
+          res,
+          400,
+          "Error while uploading image to cloudinary"
+        );
+      }
+
+      await prisma.user.update({
+        where: {
+          email: user.email,
+        },
+        data: {
+          profileImage: profileImage.url,
+        },
+      });
+
+      return handleTryResponseError(
+        res,
+        200,
+        "Profile Image Uploaded Successfully"
+      );
+    } catch (error) {
+      return handleCatchError(
+        error,
+        res,
+        "Error while uploading Profile Image"
+      );
+    }
+  }
+);
 
 export default authHandler;
