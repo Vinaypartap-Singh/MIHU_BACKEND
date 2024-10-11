@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://doadmin:AVNS_oV-I88N3yA3nb07piPn@db-postgresql-mihu-do-user-18010264-0.g.db.ondigitalocean.com:25060/mihu?sslmode=require"
 }
 
 model User {
