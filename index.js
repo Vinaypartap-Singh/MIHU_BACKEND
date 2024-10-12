@@ -26,7 +26,7 @@ app.use(
     origin: [
       "https://mihu-builder.netlify.app",
       "http://localhost:3000",
-      "http://localhost:5173/",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
