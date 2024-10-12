@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 7000;
 
 // Express CORS and URl Encoded
-app.use(cors());
+app.use(cors({ origin: "https://mihu-builder.netlify.app" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
