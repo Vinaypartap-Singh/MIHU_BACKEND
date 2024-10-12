@@ -23,7 +23,11 @@ server.headersTimeout = 40000; // 40 seconds
 // Express CORS and URl Encoded
 app.use(
   cors({
-    origin: ["https://mihu-builder.netlify.app", "http://localhost:3000"],
+    origin: [
+      "https://mihu-builder.netlify.app",
+      "http://localhost:3000",
+      "http://localhost:5173/",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
