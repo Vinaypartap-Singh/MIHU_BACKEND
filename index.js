@@ -3,12 +3,22 @@ import "dotenv/config";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import ejs from "ejs";
 import routeHandler from "./routes/index.js";
+import http from "http";
 
 // Setup
 const app = express();
 const PORT = process.env.PORT || 7000;
+
+// server
+
+const server = http.createServer(app);
+
+// Set keep-alive timeout to 30 seconds (30000 ms)
+server.keepAliveTimeout = 30000; // 30 seconds
+
+// Optional: Increase the headers timeout if needed
+server.headersTimeout = 40000; // 40 seconds
 
 // Express CORS and URl Encoded
 app.use(
