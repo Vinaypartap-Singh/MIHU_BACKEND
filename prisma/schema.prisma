@@ -40,10 +40,10 @@ model User {
 }
 
 model Header {
-  id                 String        @id @default(uuid())
-  user               User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                 String   @id @default(uuid())
+  user               User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id            String
-  title              String        @default("Mihu")
+  title              String   @default("Mihu")
   storeLogo          String?
   headerButtonTitle  String
   headerButtonUrl    String
@@ -65,10 +65,8 @@ model Header {
   privacyPolicy      String?
   coverImage         String?
   photos             String[] // Array of URLs for additional images
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  SocialMedia        SocialMedia[]
-  Navigation         Navigation[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model SocialMedia {
@@ -77,8 +75,6 @@ model SocialMedia {
   user_id   String
   platform  String // E.g., "Facebook", "Instagram"
   username  String
-  header    Header   @relation(fields: [header_id], references: [id], onDelete: Cascade)
-  header_id String
   createdAt DateTime @default(now())
 }
 
@@ -88,7 +84,5 @@ model Navigation {
   user_id   String
   title     String // E.g., "Home", "About Us"
   url       String // Link associated with the navigation item
-  header    Header   @relation(fields: [header_id], references: [id], onDelete: Cascade)
-  header_id String
   createdAt DateTime @default(now())
 }

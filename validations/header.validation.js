@@ -42,3 +42,29 @@ export const headerSchema = z.object({
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().optional(),
 });
+
+export const socialMediaSchema = z.object({
+  platform: z
+    .string()
+    .min(1, { message: "Platform is required" })
+    .max(50, { message: "Platform must be 50 characters or fewer" })
+    .refine(
+      (val) =>
+        ["Facebook", "Instagram", "Twitter", "LinkedIn", "YouTube"].includes(
+          val
+        ),
+      {
+        message:
+          "Platform must be one of Facebook, Instagram, Twitter, LinkedIn, or YouTube",
+      }
+    ),
+  username: z
+    .string()
+    .min(1, { message: "Username is required" })
+    .max(100, { message: "Username must be 100 characters or fewer" }),
+});
+
+export const navigationSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  url: z.string().url("Invalid URL format"),
+});
