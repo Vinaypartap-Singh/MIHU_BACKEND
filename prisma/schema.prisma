@@ -10,28 +10,85 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://doadmin:AVNS_oV-I88N3yA3nb07piPn@db-postgresql-mihu-do-user-18010264-0.g.db.ondigitalocean.com:25060/mihu?sslmode=require"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id                        String    @id @default(uuid())
+  id                        String        @id @default(uuid())
   name                      String
-  email                     String    @unique
+  email                     String        @unique
   password                  String
   profileImage              String?
-  enableTwoFactorEmail      Boolean   @default(false)
+  enableTwoFactorEmail      Boolean       @default(false)
   twoFactorEmail            String?
   twoFactorEmailOTP         Int?
   twoFactorEmailOTPExpiry   DateTime?
-  isTwoFactorEmailVerified  Boolean   @default(false)
-  forceTwoFactorDisable     Boolean   @default(false)
+  isTwoFactorEmailVerified  Boolean       @default(false)
+  forceTwoFactorDisable     Boolean       @default(false)
   emailVerifyOtp            Int?
-  emailVerified             Boolean   @default(false)
+  emailVerified             Boolean       @default(false)
   emailVerifyOtpExpiry      DateTime?
   passwordResetOtp          Int?
   passwordResetOtpExpiry    DateTime?
   passwordResetOtp2FA       Int?
   passwordResetOtpExpiry2FA DateTime?
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+  Header                    Header[]
+  SocialMedia               SocialMedia[]
+  Navigation                Navigation[]
+}
+
+model Header {
+  id                 String        @id @default(uuid())
+  user               User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id            String
+  title              String        @default("Mihu")
+  storeLogo          String?
+  headerButtonTitle  String
+  headerButtonUrl    String
+  name               String
+  tagline            String?
+  address            String
+  city               String
+  state              String
+  country            String
+  postalCode         String
+  phone              String
+  contactEmail       String
+  businessType       String
+  registrationNumber String?
+  taxId              String?
+  openingHours       Json? // JSON format for flexible storage of hours
+  returnPolicy       String?
+  shippingPolicy     String?
+  privacyPolicy      String?
+  coverImage         String?
+  photos             String[] // Array of URLs for additional images
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  SocialMedia        SocialMedia[]
+  Navigation         Navigation[]
+}
+
+model SocialMedia {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id   String
+  platform  String // E.g., "Facebook", "Instagram"
+  username  String
+  header    Header   @relation(fields: [header_id], references: [id], onDelete: Cascade)
+  header_id String
+  createdAt DateTime @default(now())
+}
+
+model Navigation {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id   String
+  title     String // E.g., "Home", "About Us"
+  url       String // Link associated with the navigation item
+  header    Header   @relation(fields: [header_id], references: [id], onDelete: Cascade)
+  header_id String
+  createdAt DateTime @default(now())
 }
