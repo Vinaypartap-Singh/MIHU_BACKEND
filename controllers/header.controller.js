@@ -233,4 +233,4 @@ headerHandler.post("/navigation", authMiddleware, async (req, res) => {
   }
 });
 
-export default socialMediaHandler;
+export default headerHandler;
