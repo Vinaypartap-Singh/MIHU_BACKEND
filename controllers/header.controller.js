@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { upload } from "../middleware/multer.middleware";
-import { handleCatchError, handleTryResponseError } from "../helper";
-import { authMiddleware } from "../middleware/auth.middleware";
-import prisma from "../db/db.config";
-import { uploadOnCloudinary } from "../config/cloudinary";
+import { upload } from "../middleware/multer.middleware.js";
+import { handleCatchError, handleTryResponseError } from "../helper.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import prisma from "../db/db.config.js";
+import { uploadOnCloudinary } from "../config/cloudinary.js";
 import {
   headerSchema,
   navigationSchema,
   socialMediaSchema,
-} from "../validations/header.validation";
+} from "../validations/header.validation.js";
 
 const headerHandler = Router();
 

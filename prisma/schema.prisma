@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,75 +8,77 @@ datasource db {
 }
 
 model User {
-  id                        String        @id @default(uuid())
-  name                      String
-  email                     String        @unique
-  password                  String
-  profileImage              String?
-  enableTwoFactorEmail      Boolean       @default(false)
-  twoFactorEmail            String?
-  twoFactorEmailOTP         Int?
-  twoFactorEmailOTPExpiry   DateTime?
-  isTwoFactorEmailVerified  Boolean       @default(false)
-  forceTwoFactorDisable     Boolean       @default(false)
-  emailVerifyOtp            Int?
-  emailVerified             Boolean       @default(false)
-  emailVerifyOtpExpiry      DateTime?
-  passwordResetOtp          Int?
-  passwordResetOtpExpiry    DateTime?
-  passwordResetOtp2FA       Int?
-  passwordResetOtpExpiry2FA DateTime?
-  createdAt                 DateTime      @default(now())
-  updatedAt                 DateTime      @updatedAt
-  Header                    Header[]
-  SocialMedia               SocialMedia[]
-  Navigation                Navigation[]
+  id                      String        @id @default(uuid())
+  name                    String
+  email                   String        @unique
+  password                String
+  profileImage            String?
+  bio                     String? // Short user bio
+  enableTwoFactorEmail    Boolean       @default(false)
+  twoFactorEmailOTP       Int?
+  twoFactorEmailOTPExpiry DateTime?
+  emailVerified           Boolean       @default(false)
+  emailVerifyOtp          Int?
+  emailVerifyOtpExpiry    DateTime?
+  passwordResetOtp        Int?
+  passwordResetOtpExpiry  DateTime?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  posts                   Post[]
+  comments                Comment[]
+  likes                   Like[]
+  socialMediaLinks        SocialMedia[]
+  followers               Follower[]    @relation("Followers") // Users who follow this user
+  following               Follower[]    @relation("Following") // Users this user is following
 }
 
-model Header {
-  id                 String   @id @default(uuid())
-  user               User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id            String
-  title              String   @default("Mihu")
-  storeLogo          String?
-  headerButtonTitle  String
-  headerButtonUrl    String
-  name               String
-  tagline            String?
-  address            String
-  city               String
-  state              String
-  country            String
-  postalCode         String
-  phone              String
-  contactEmail       String
-  businessType       String
-  registrationNumber String?
-  taxId              String?
-  openingHours       Json? // JSON format for flexible storage of hours
-  returnPolicy       String?
-  shippingPolicy     String?
-  privacyPolicy      String?
-  coverImage         String?
-  photos             String[] // Array of URLs for additional images
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+model Post {
+  id        String    @id @default(uuid())
+  content   String
+  imageUrl  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+}
+
+model Follower {
+  id          String   @id @default(uuid())
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  String
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId String
+  createdAt   DateTime @default(now())
 }
 
 model SocialMedia {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
   platform  String // E.g., "Facebook", "Instagram"
   username  String
-  createdAt DateTime @default(now())
-}
-
-model Navigation {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id   String
-  title     String // E.g., "Home", "About Us"
-  url       String // Link associated with the navigation item
+  url       String? // Optional link to the user's profile on the platform
   createdAt DateTime @default(now())
 }
