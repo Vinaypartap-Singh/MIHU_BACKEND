@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import ejs from "ejs";
 import { ZodError } from "zod";
+import prisma from "./db/db.config.js";
 
 // Get Directory
 
@@ -59,6 +60,20 @@ export const handleTryResponseError = (res, status, message, data) => {
   });
 };
 
+export const handleTryResponseSuccess = (res, status, message, data) => {
+  if (data) {
+    return res.status(status || 200).json({
+      message: message || "Common Try Response Error Handler",
+      data: data,
+    });
+  }
+
+  return res.status(status || 200).json({
+    message: message || "Common Try Response Error Handler",
+    data: {},
+  });
+};
+
 export const verifyUserAndReturn = async (user_id) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -73,6 +88,8 @@ export const verifyUserAndReturn = async (user_id) => {
   if (!user.emailVerified) {
     return handleTryResponseError(res, 400, "Please Verify Your Account");
   }
+
+  return user;
 };
 
 export const findUserUsingEmailAndReturn = async (email) => {
@@ -97,4 +114,6 @@ export const findUserUsingEmailAndReturn = async (email) => {
       "Please verify your account to login"
     );
   }
+
+  return user;
 };

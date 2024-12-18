@@ -228,7 +228,7 @@ authHandler.post("/login", async (req, res) => {
     const body = req.body;
     const payload = loginSchemaValidation.parse(body);
 
-    const user = findUserUsingEmailAndReturn(payload.email);
+    const user = await findUserUsingEmailAndReturn(payload.email);
 
     // check password
 

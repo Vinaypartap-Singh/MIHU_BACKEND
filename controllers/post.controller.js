@@ -4,6 +4,7 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 import {
   handleCatchError,
   handleTryResponseError,
+  handleTryResponseSuccess,
   verifyUserAndReturn,
 } from "../helper.js";
 import prisma from "../db/db.config.js";
@@ -24,7 +25,7 @@ postHandler.post(
   authMiddleware,
   async (req, res) => {
     try {
-      const user_id = req.user;
+      const user_id = req.user.id;
       const body = req.body;
       const payload = postSchema.parse(body);
 
@@ -44,6 +45,7 @@ postHandler.post(
 
       const newPost = await prisma.post.create({
         data: {
+          title: payload.title,
           content: payload.content,
           imageUrl: postImage.url,
           authorId: user.id,
