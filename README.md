@@ -244,7 +244,7 @@ npm install
 
 ```
 
-# Environment Variables
+## Environment Variables
 
 To properly configure and run the application, the following environment variables are required:
 
