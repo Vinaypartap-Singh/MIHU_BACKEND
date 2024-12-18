@@ -2,9 +2,11 @@ import { Router } from "express";
 import { sendMail } from "../config/mail.js";
 import prisma from "../db/db.config.js";
 import {
+  findUserUsingEmailAndReturn,
   handleCatchError,
   handleTryResponseError,
   renderEmailEjs,
+  verifyUserAndReturn,
 } from "../helper.js";
 import {
   loginSchemaValidation,
@@ -226,27 +228,7 @@ authHandler.post("/login", async (req, res) => {
     const body = req.body;
     const payload = loginSchemaValidation.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email: payload.email,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(
-        res,
-        400,
-        "User does not exist with this email. Please check your email."
-      );
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please verify your account to login"
-      );
-    }
+    const user = findUserUsingEmailAndReturn(payload.email);
 
     // check password
 
@@ -294,27 +276,7 @@ authHandler.post("/check/credentials", async (req, res) => {
     const body = req.body;
     const payload = loginSchemaValidation.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email: payload.email,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(
-        res,
-        400,
-        "User does not exist with this email. Please check your email."
-      );
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please verify your account to login"
-      );
-    }
+    const user = findUserUsingEmailAndReturn(payload.email);
 
     // check password
 
@@ -384,23 +346,7 @@ authHandler.post(
     try {
       const user_id = req.user;
 
-      const user = await prisma.user.findUnique({
-        where: {
-          id: user_id,
-        },
-      });
-
-      if (!user) {
-        return handleTryResponseError(res, 400, "Unauthorized Access");
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(
-          res,
-          400,
-          "Please verify your account in order to upload profile image"
-        );
-      }
+      const user = await verifyUserAndReturn(user_id);
 
       const profileImageLocalPath = req.file.path;
       const profileImage = await uploadOnCloudinary(profileImageLocalPath);

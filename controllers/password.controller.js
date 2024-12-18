@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import {
+  findUserUsingEmailAndReturn,
   handleCatchError,
   handleTryResponseError,
   renderEmailEjs,
+  verifyUserAndReturn,
 } from "../helper.js";
 import {
   passwordChangeSchema,
@@ -24,23 +26,8 @@ passwordHandler.post("/change-password", authMiddleware, async (req, res) => {
     const user_id = req.user;
     const body = req.body;
     const payload = passwordChangeSchema.parse(body);
-    const user = await prisma.user.findUnique({
-      where: {
-        email: user_id.email,
-      },
-    });
 
-    if (!user) {
-      return handleTryResponseError(res, 400, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please verify your account first"
-      );
-    }
+    const user = await verifyUserAndReturn(user_id);
 
     if (payload.password === payload.oldPassword) {
       return handleTryResponseError(
@@ -95,27 +82,7 @@ passwordHandler.post("/request-reset-password", async (req, res) => {
     const body = req.body;
     const payload = passwordResetRequestValidation.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email: payload.email,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Unauthorized Access. User not Found"
-      );
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please verify your account to login"
-      );
-    }
+    const user = findUserUsingEmailAndReturn(payload.email);
 
     const otpExpiryDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
     const passwordResetOtp = Math.floor(100000 + Math.random() * 900000);
@@ -156,27 +123,7 @@ passwordHandler.post("/reset-password", async (req, res) => {
     const body = req.body;
     const payload = passwordResetVerificationValidation.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email: payload.email,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Unauthorized Access. User not Found"
-      );
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please verify your account to login"
-      );
-    }
+    const user = await findUserUsingEmailAndReturn(payload.email);
 
     if (payload.otp !== user.passwordResetOtp) {
       return handleTryResponseError(res, 400, "Invalid OTP CHECK AGAIN");
@@ -235,23 +182,7 @@ passwordHandler.post(
   async (req, res) => {
     try {
       const user_id = req.user;
-      const user = await prisma.user.findUnique({
-        where: {
-          email: user_id.email,
-        },
-      });
-
-      if (!user) {
-        return handleTryResponseError(res, 400, "Unauthorized Access");
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(
-          res,
-          400,
-          "Please verify your primary email in order to reset password"
-        );
-      }
+      const user = await findUserUsingEmailAndReturn(user_id.email);
 
       if (!user.enableTwoFactorEmail) {
         return handleTryResponseError(
@@ -340,23 +271,8 @@ passwordHandler.post(
       const user_id = req.user;
       const body = req.body;
       const payload = passwordResetVerificationValidation2FA.parse(body);
-      const user = await prisma.user.findUnique({
-        where: {
-          email: user_id.email,
-        },
-      });
 
-      if (!user) {
-        return handleTryResponseError(res, 400, "Unauthorized Access");
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(
-          res,
-          400,
-          "Your Account is not verified. Please verify"
-        );
-      }
+      const user = await findUserUsingEmailAndReturn(user_id.email);
 
       if (!user.isTwoFactorEmailVerified) {
         return handleTryResponseError(

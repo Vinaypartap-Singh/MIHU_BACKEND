@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { upload } from "../middleware/multer.middleware.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { handleCatchError, handleTryResponseError } from "../helper.js";
+import {
+  handleCatchError,
+  handleTryResponseError,
+  verifyUserAndReturn,
+} from "../helper.js";
 import prisma from "../db/db.config.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
 import { postSchema } from "../validations/post.validation.js";
@@ -19,19 +23,7 @@ postHandler.post(
       const body = req.body;
       const payload = postSchema.parse(body);
 
-      const user = await prisma.user.findUnique({
-        where: {
-          id: user_id,
-        },
-      });
-
-      if (!user) {
-        return handleTryResponseError(res, 400, "Unauthorized Access");
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(res, 400, "Please Verify Your Account");
-      }
+      const user = await verifyUserAndReturn(user_id);
 
       if (!req.file) {
         return handleTryResponseError(res, 400, "No Image File Uploaded");
@@ -72,19 +64,7 @@ postHandler.put(
       const body = req.body;
       const payload = postSchema.parse(body);
 
-      const user = await prisma.user.findUnique({
-        where: {
-          id: user_id,
-        },
-      });
-
-      if (!user) {
-        return handleTryResponseError(res, 400, "Unauthorized Access");
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(res, 400, "Please Verify Your Account");
-      }
+      const user = await verifyUserAndReturn(user_id);
 
       // Find the post by ID
       const post = await prisma.post.findUnique({
@@ -148,19 +128,7 @@ postHandler.delete("/post/:id", authMiddleware, async (req, res) => {
     const user_id = req.user;
     const { id } = req.params; // Get post ID from URL parameter
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 400, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(res, 400, "Please Verify Your Account");
-    }
+    const user = await verifyUserAndReturn(user_id);
 
     // Find the post by ID
     const post = await prisma.post.findUnique({

@@ -15,6 +15,7 @@ model User {
   profileImage            String?
   bio                     String? // Short user bio
   enableTwoFactorEmail    Boolean       @default(false)
+  twoFactorEmail          String?
   twoFactorEmailOTP       Int?
   twoFactorEmailOTPExpiry DateTime?
   emailVerified           Boolean       @default(false)

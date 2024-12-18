@@ -53,10 +53,48 @@ export const handleTryResponseError = (res, status, message, data) => {
     });
   }
 
-  return res
-    .status(status || 200)
-    .json({
-      message: message || "Common Try Response Error Handler",
-      data: {},
-    });
+  return res.status(status || 200).json({
+    message: message || "Common Try Response Error Handler",
+    data: {},
+  });
+};
+
+export const verifyUserAndReturn = async (user_id) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: user_id,
+    },
+  });
+
+  if (!user) {
+    return handleTryResponseError(res, 400, "Please Log In Continue");
+  }
+
+  if (!user.emailVerified) {
+    return handleTryResponseError(res, 400, "Please Verify Your Account");
+  }
+};
+
+export const findUserUsingEmailAndReturn = async (email) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  if (!user) {
+    return handleTryResponseError(
+      res,
+      400,
+      "Unauthorized Access. User not Found"
+    );
+  }
+
+  if (!user.emailVerified) {
+    return handleTryResponseError(
+      res,
+      400,
+      "Please verify your account to login"
+    );
+  }
 };

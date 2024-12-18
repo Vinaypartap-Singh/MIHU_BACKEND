@@ -5,6 +5,7 @@ import {
   handleCatchError,
   handleTryResponseError,
   handleTryResponseSuccess,
+  verifyUserAndReturn,
 } from "../helper.js";
 
 const followerHandler = Router();
@@ -16,22 +17,10 @@ followerHandler.post("/follow/:id", authMiddleware, async (req, res) => {
     const { id: followingId } = req.params; // The user to be followed
     const user_id = req.user;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
-    });
+    const user = await verifyUserAndReturn(user_id);
 
     if (!user) {
       return handleTryResponseError(res, 400, "Please Log In To like the post");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please Verify Your To like the post"
-      );
     }
 
     if (followerId === followingId) {
@@ -82,23 +71,7 @@ followerHandler.delete("/unfollow/:id", authMiddleware, async (req, res) => {
     const { id: followingId } = req.params; // The user to be unfollowed
     const user_id = req.user;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 400, "Please Log In To like the post");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        400,
-        "Please Verify Your To like the post"
-      );
-    }
+    const user = await verifyUserAndReturn(user_id);
 
     if (followerId === followingId) {
       return handleTryResponseError(res, 400, "You cannot unfollow yourself");

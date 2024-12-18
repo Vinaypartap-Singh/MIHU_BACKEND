@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import prisma from "../db/db.config.js";
-import { handleCatchError, handleTryResponseError } from "../helper.js";
+import {
+  handleCatchError,
+  handleTryResponseError,
+  verifyUserAndReturn,
+} from "../helper.js";
 
 const commentHandler = Router();
 
@@ -12,19 +16,7 @@ commentHandler.post("/post/:id/comment", authMiddleware, async (req, res) => {
     const { id } = req.params; // Get post ID from URL parameter
     const { content } = req.body;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 400, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(res, 400, "Please Verify Your Account");
-    }
+    const user = await verifyUserAndReturn(user_id);
 
     if (!content) {
       return handleTryResponseError(res, 400, "Comment content is required");
@@ -63,20 +55,7 @@ commentHandler.put("/comment/:id", authMiddleware, async (req, res) => {
     const user_id = req.user;
     const { id } = req.params; // Get comment ID from URL parameter
     const { content } = req.body;
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 400, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(res, 400, "Please Verify Your Account");
-    }
+    const user = await verifyUserAndReturn(user_id);
 
     if (!content) {
       return handleTryResponseError(res, 400, "Comment content is required");
@@ -123,19 +102,7 @@ commentHandler.delete("/comment/:id", authMiddleware, async (req, res) => {
     const user_id = req.user;
     const { id } = req.params; // Get comment ID from URL parameter
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: user_id,
-      },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 400, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(res, 400, "Please Verify Your Account");
-    }
+    const user = await verifyUserAndReturn(user_id);
 
     const comment = await prisma.comment.findUnique({
       where: { id: id },

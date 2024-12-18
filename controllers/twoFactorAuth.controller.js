@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  findUserUsingEmailAndReturn,
   handleCatchError,
   handleTryResponseError,
   renderEmailEjs,
@@ -22,21 +23,7 @@ twoFAHandler.post("/toggle", authMiddleware, async (req, res) => {
     const body = req.body;
     const payload = twoFAToggleSchemaValidation.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: { email: user_id.email },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 401, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        401,
-        "Please verify your email to enable two-factor authentication."
-      );
-    }
+    const user = findUserUsingEmailAndReturn(user_id.email);
 
     if (user.twoFactorEmail && user.isTwoFactorEmailVerified) {
       return handleTryResponseError(
@@ -133,21 +120,9 @@ twoFAHandler.post("/addEmail", authMiddleware, async (req, res) => {
     const body = req.body;
     const payload = twoFAEmailSchema.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: { email: user_id.email },
-    });
+    //  user_id.email
 
-    if (!user) {
-      return handleTryResponseError(res, 401, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        401,
-        "Please verify your email to add a Two-Factor Authentication email."
-      );
-    }
+    const user = await findUserUsingEmailAndReturn(user_id.email);
 
     if (!user.enableTwoFactorEmail) {
       return handleTryResponseError(
@@ -243,21 +218,7 @@ twoFAHandler.post("/verify-email", authMiddleware, async (req, res) => {
     const body = req.body;
     const payload = twoFAVerifySchema.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: { email: user_id.email },
-    });
-
-    if (!user) {
-      return handleTryResponseError(res, 401, "Unauthorized Access");
-    }
-
-    if (!user.emailVerified) {
-      return handleTryResponseError(
-        res,
-        401,
-        "Please verify your email before adding a Two-Factor email."
-      );
-    }
+    const user = await findUserUsingEmailAndReturn(user_id.email);
 
     if (!user.enableTwoFactorEmail) {
       return handleTryResponseError(

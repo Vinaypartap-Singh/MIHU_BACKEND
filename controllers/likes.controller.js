@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../db/db.config.js";
-import { handleTryResponseError } from "../helper.js";
+import { handleTryResponseError, verifyUserAndReturn } from "../helper.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const likeHandler = Router();
@@ -14,27 +14,7 @@ likeHandler.post(
       const user_id = req.user; // Get the logged-in user's ID from the authMiddleware
       const { postId } = req.params; // Get the post ID from the URL parameter
 
-      const user = await prisma.user.findUnique({
-        where: {
-          id: user_id,
-        },
-      });
-
-      if (!user) {
-        return handleTryResponseError(
-          res,
-          400,
-          "Please Log In To like the post"
-        );
-      }
-
-      if (!user.emailVerified) {
-        return handleTryResponseError(
-          res,
-          400,
-          "Please Verify Your To like the post"
-        );
-      }
+      const user = await verifyUserAndReturn(user_id);
 
       // Find the post in the database
       const post = await prisma.post.findUnique({
