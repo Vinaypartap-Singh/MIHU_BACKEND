@@ -1,5 +1,3 @@
-
-
 # MIHU Backend API
 
 This repository contains the backend API for MIHU. The API is built to handle authentication, password management, and error handling efficiently.
@@ -8,139 +6,202 @@ This repository contains the backend API for MIHU. The API is built to handle au
 
 ### Authentication Routes
 
-- **POST `/api/auth/register`**  
-  Register a new user.
+- **POST `/api/auth/register`**
 
-- **POST `/api/auth/verify-email`**  
-  Verify the email address of the registered user.
+Register a new user.
 
-- **POST `/api/auth/resend-otp`**  
-  Resend the OTP to the user's email for verification.
+- **POST `/api/auth/verify-email`**
 
-- **POST `/api/auth/login`**  
-  Log in an existing user.
+Verify the email address of the registered user.
 
-- **GET `/api/auth/user`**  
-  Retrieve user information.
+- **POST `/api/auth/resend-otp`**
 
+Resend the OTP to the user's email for verification.
+
+- **POST `/api/auth/login`**
+
+Log in an existing user.
+
+- **GET `/api/auth/user`**
+
+Retrieve user information.
 
 ### Password Management Routes
 
-- **POST `/api/password/request-reset-password`**  
-  Request a password reset by sending an OTP to the user's email.
+- **POST `/api/password/request-reset-password`**
 
-- **POST `/api/password/reset-password`**  
-  Verify the OTP and reset the user's password if verified.
+Request a password reset by sending an OTP to the user's email.
 
-- **POST `/api/password/reset-request-password-2fa`**  
-  If Two-Factor Authentication (2FA) is enabled, this route sends a password reset request to the user's 2FA email (if available). This step ensures an additional layer of security for the user.
+- **POST `/api/password/reset-password`**
 
-- **POST `/api/password/reset-password-2fa`**  
-  This route is used to verify the OTP sent to the 2FA email and reset the user's password if the verification succeeds. This ensures that only the authenticated user with access to the 2FA email can change the password.
+Verify the OTP and reset the user's password if verified.
 
+- **POST `/api/password/reset-request-password-2fa`**
+
+If Two-Factor Authentication (2FA) is enabled, this route sends a password reset request to the user's 2FA email (if available). This step ensures an additional layer of security for the user.
+
+- **POST `/api/password/reset-password-2fa`**
+
+This route is used to verify the OTP sent to the 2FA email and reset the user's password if the verification succeeds. This ensures that only the authenticated user with access to the 2FA email can change the password.
 
 ### Post Routes
 
-- **POST `/api/posts/upload`**  
-  Upload a new post. Requires authentication and an image file.
+- **POST `/api/posts/upload`**
 
-- **PUT `/api/posts/post/:id`**  
-  Update a post by its ID. Requires authentication and ensures only the author can edit their post.
+Upload a new post. Requires authentication and an image file.
 
-- **DELETE `/api/posts/post/:id`**  
-  Delete a post by its ID. Requires authentication and ensures only the author can delete their post.
+- **PUT `/api/posts/post/:id`**
 
-- **GET `/api/posts/post/:id`**  
-  Retrieve a specific post by its ID, including author details, comments, and likes.
+Update a post by its ID. Requires authentication and ensures only the author can edit their post.
 
-- **GET `/api/posts`**  
-  Retrieve all posts, ordered by the latest first. Includes author details, comments, and likes.
+- **DELETE `/api/posts/post/:id`**
 
+Delete a post by its ID. Requires authentication and ensures only the author can delete their post.
+
+- **GET `/api/posts/post/:id`**
+
+Retrieve a specific post by its ID, including author details, comments, and likes.
+
+- **GET `/api/posts`**
+
+Retrieve all posts, ordered by the latest first. Includes author details, comments, and likes.
 
 ### Like Routes
 
-- **POST `/api/like/:postId`**  
-  Like a specific post by its ID.  
-  - **Requires Authentication**: The user must be logged in.  
-  - **Validations**:  
-    - The user must have a verified email.  
-    - The post must exist.  
-    - The user must not have already liked the post.  
-  - **Response**:  
-    - Success: "Post Liked Successfully" along with the updated like information.  
-    - Errors:  
-      - "Please Log In To like the post"  
-      - "Please Verify Your Email To like the post"  
-      - "Post Not Found"  
-      - "You have already liked this post"  
+- **POST `/api/like/:postId`**
 
-- **DELETE `/api/unlike/:postId`**  
-  Unlike a specific post by its ID.  
-  - **Requires Authentication**: The user must be logged in.  
-  - **Validations**:  
-    - The post must exist.  
-    - The user must have previously liked the post.  
-  - **Response**:  
-    - Success: "Post Unliked Successfully".  
-    - Errors:  
-      - "Post Not Found"  
-      - "You haven't liked this post yet"
-     
+Like a specific post by its ID.
+
+- **Requires Authentication**: The user must be logged in.
+
+- **Validations**:
+
+- The user must have a verified email.
+
+- The post must exist.
+
+- The user must not have already liked the post.
+
+- **Response**:
+
+- Success: "Post Liked Successfully" along with the updated like information.
+
+- Errors:
+
+- "Please Log In To like the post"
+
+- "Please Verify Your Email To like the post"
+
+- "Post Not Found"
+
+- "You have already liked this post"
+
+- **DELETE `/api/unlike/:postId`**
+
+Unlike a specific post by its ID.
+
+- **Requires Authentication**: The user must be logged in.
+
+- **Validations**:
+
+- The post must exist.
+
+- The user must have previously liked the post.
+
+- **Response**:
+
+- Success: "Post Unliked Successfully".
+
+- Errors:
+
+- "Post Not Found"
+
+- "You haven't liked this post yet"
+
 ### Comment Routes
 
-- **POST `/api/post/:id/comment`**  
-  Add a comment to a post.  
-  - **Requires Authentication**: Yes  
-  - **Validations**: Verified email, valid post, and non-empty content  
-  - **Response**: Success or relevant error messages  
+- **POST `/api/post/:id/comment`**
 
-- **PUT `/api/comment/:id`**  
-  Update a comment by ID.  
-  - **Requires Authentication**: Yes  
-  - **Validations**: Verified email, valid comment, ownership, and non-empty content  
-  - **Response**: Success or relevant error messages  
+Add a comment to a post.
 
-- **DELETE `/api/comment/:id`**  
-  Delete a comment by ID.  
-  - **Requires Authentication**: Yes  
-  - **Validations**: Verified email, valid comment, and ownership  
-  - **Response**: Success or relevant error messages  
+- **Requires Authentication**: Yes
 
-- **GET `/api/post/:id/comments`**  
-  Get all comments for a post.  
-  - **Validations**: Valid post  
-  - **Response**: List of comments or error message  
+- **Validations**: Verified email, valid post, and non-empty content
+
+- **Response**: Success or relevant error messages
+
+- **PUT `/api/comment/:id`**
+
+Update a comment by ID.
+
+- **Requires Authentication**: Yes
+
+- **Validations**: Verified email, valid comment, ownership, and non-empty content
+
+- **Response**: Success or relevant error messages
+
+- **DELETE `/api/comment/:id`**
+
+Delete a comment by ID.
+
+- **Requires Authentication**: Yes
+
+- **Validations**: Verified email, valid comment, and ownership
+
+- **Response**: Success or relevant error messages
+
+- **GET `/api/post/:id/comments`**
+
+Get all comments for a post.
+
+- **Validations**: Valid post
+
+- **Response**: List of comments or error message
 
 ### Follower Routes
 
-- **POST `/api/follow/:id`**  
-  Follow a user.  
-  - **Requires Authentication**: Yes  
-  - **Validations**: Verified email, not following yourself, and no existing follow relationship  
-  - **Response**: Success or relevant error messages  
+- **POST `/api/follow/:id`**
 
-- **DELETE `/api/unfollow/:id`**  
-  Unfollow a user.  
-  - **Requires Authentication**: Yes  
-  - **Validations**: Verified email, not unfollowing yourself, and existing follow relationship  
-  - **Response**: Success or relevant error messages  
+Follow a user.
 
-- **GET `/api/followers/:id`**  
-  Get all followers of a user.  
-  - **Validations**: Valid user  
-  - **Response**: List of followers or error message  
+- **Requires Authentication**: Yes
 
-- **GET `/api/following/:id`**  
-  Get all users a specific user is following.  
-  - **Validations**: Valid user  
-  - **Response**: List of users being followed or error message
+- **Validations**: Verified email, not following yourself, and no existing follow relationship
 
-  
+- **Response**: Success or relevant error messages
+
+- **DELETE `/api/unfollow/:id`**
+
+Unfollow a user.
+
+- **Requires Authentication**: Yes
+
+- **Validations**: Verified email, not unfollowing yourself, and existing follow relationship
+
+- **Response**: Success or relevant error messages
+
+- **GET `/api/followers/:id`**
+
+Get all followers of a user.
+
+- **Validations**: Valid user
+
+- **Response**: List of followers or error message
+
+- **GET `/api/following/:id`**
+
+Get all users a specific user is following.
+
+- **Validations**: Valid user
+
+- **Response**: List of users being followed or error message
 
 ## Error Handling
 
 Error handling is managed by two helper functions:
+
 - **handleCatchError**: This function captures errors, particularly from Zod validation, and returns a structured error response.
+
 - **handleTryResponseError**: This function provides a consistent response structure for successful operations and common errors.
 
 ## Utility Functions
@@ -148,8 +209,11 @@ Error handling is managed by two helper functions:
 ### sendMail
 
 The `sendMail` function is used to send emails. It takes the following parameters:
+
 - `to`: The recipient's email address.
+
 - `message`: The content of the email.
+
 - `html`: The path to the HTML file for the email template.
 
 ### formatZodError
@@ -165,14 +229,51 @@ The `renderEmailEjs` function renders EJS templates into HTML format. It takes a
 To install the necessary dependencies, run:
 
 ```bash
+
 npm install
+
 ```
+
 ## Usage
 
 After cloning the repository and installing the dependencies, start the server using:
+
 ```bash
+
 npm install
+
 ```
+
+# Environment Variables
+
+To properly configure and run the application, the following environment variables are required:
+
+### General Configuration
+
+- **`PORT`**: The port number on which the application will run.
+- **`DATABASE_URL`**: The connection URL for the database.
+
+### Email Configuration
+
+- **`SMTP_HOST`**: The SMTP server host for sending emails.
+- **`SMTP_PORT`**: The port number for the SMTP server.
+- **`SMTP_USER`**: The username for SMTP authentication.
+- **`SMTP_PASS`**: The password for SMTP authentication.
+- **`FROM_EMAIL`**: The sender's email address used in email communication.
+- **`to`**: The recipient's email address (used dynamically within the application).
+- **`message`**: The content of the email (used dynamically within the application).
+- **`html`**: The path to the HTML file for the email template.
+
+### Authentication Configuration
+
+- **`JWT_TOKEN`**: The secret key for signing JSON Web Tokens (JWTs).
+
+### Cloudinary Configuration
+
+- **`CLOUDINARY_CLOUD_NAME`**: The Cloudinary cloud name for file uploads.
+- **`CLOUDINARY_API_KEY`**: The API key for accessing Cloudinary.
+- **`CLOUDINARY_API_SECRET`**: The API secret for accessing Cloudinary.
+
 ## Contributing
 
 Feel free to open issues or submit pull requests for any improvements or bug fixes.
@@ -180,5 +281,7 @@ Feel free to open issues or submit pull requests for any improvements or bug fix
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
-### Notes: - Adjust any sections as necessary to match your project specifics. 
+
+### Notes: - Adjust any sections as necessary to match your project specifics.
+
 - Ensure the installation, usage, and contribution instructions align with how you want users to interact with your project. - Include additional sections like **License**, **Contact Information**, or **Acknowledgments** if relevant.
