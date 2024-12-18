@@ -9,8 +9,13 @@ import {
 import prisma from "../db/db.config.js";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
 import { postSchema } from "../validations/post.validation.js";
+import NodeCache from "node-cache";
 
 const postHandler = Router();
+
+// Node Cache
+
+const cache = new NodeCache({ stdTTL: 300 });
 
 // Upload a Post
 postHandler.post(
@@ -44,6 +49,8 @@ postHandler.post(
           authorId: user.id,
         },
       });
+
+      cache.del("all_posts");
 
       return handleTryResponseError(res, 200, "Post Updated", newPost);
     } catch (error) {
@@ -110,6 +117,8 @@ postHandler.put(
         },
       });
 
+      cache.del("all_posts");
+
       return handleTryResponseSuccess(
         res,
         200,
@@ -153,6 +162,8 @@ postHandler.delete("/post/:id", authMiddleware, async (req, res) => {
       where: { id: id },
     });
 
+    cache.del("all_posts");
+
     return handleTryResponseSuccess(res, 200, "Post Deleted Successfully");
   } catch (error) {
     return handleCatchError(error, res, "Error While Deleting Post");
@@ -194,6 +205,17 @@ postHandler.get("/post/:id", async (req, res) => {
 // Get all posts
 postHandler.get("/posts", async (req, res) => {
   try {
+    const cachedPosts = cache.get("all_posts");
+
+    if (cachedPosts) {
+      return handleTryResponseSuccess(
+        res,
+        200,
+        "Posts Retrieved Successfully",
+        cachedPosts
+      );
+    }
+
     // Retrieve all posts with optional related data (author, comments, likes)
     const posts = await prisma.post.findMany({
       include: {
@@ -210,6 +232,8 @@ postHandler.get("/posts", async (req, res) => {
     if (posts.length === 0) {
       return handleTryResponseError(res, 404, "No Posts Found");
     }
+
+    cache.set("all_posts", posts);
 
     // Return the list of posts
     return handleTryResponseSuccess(
