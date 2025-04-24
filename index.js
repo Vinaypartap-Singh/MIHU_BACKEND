@@ -1,14 +1,20 @@
-import express from "express";
-import "dotenv/config";
 import cors from "cors";
+import "dotenv/config";
+import express from "express";
+import http from "http";
 import path from "path";
+import swaggerUI from "swagger-ui-express";
 import { fileURLToPath } from "url";
 import routeHandler from "./routes/index.js";
-import http from "http";
+import { swaggerDocs } from "./swagger.js";
 
 // Setup
 const app = express();
 const PORT = process.env.PORT || 7000;
+
+// Swagger Config and Init
+
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // server
 
@@ -43,6 +49,22 @@ app.set("views", path.resolve(__dirname, "./views"));
 
 // Handle Routes
 app.use(routeHandler);
+
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Server status check
+ *     description: Returns a message if server is running
+ *     tags: [Server Check]
+ *     responses:
+ *       200:
+ *         description: Server is Running
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Server is running
+ */
 
 app.get("/", async (req, res) => {
   return res.json({ message: "Server is running" });

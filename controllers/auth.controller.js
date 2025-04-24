@@ -1,4 +1,7 @@
+import bcrypt from "bcryptjs";
 import { Router } from "express";
+import jwt from "jsonwebtoken";
+import { uploadOnCloudinary } from "../config/cloudinary.js";
 import { sendMail } from "../config/mail.js";
 import prisma from "../db/db.config.js";
 import {
@@ -8,17 +11,15 @@ import {
   renderEmailEjs,
   verifyUserAndReturn,
 } from "../helper.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 import {
   loginSchemaValidation,
   registerSchemaValidation,
   reSendVerificationOTPSchema,
   verifyEmailSchema,
 } from "../validations/auth.validation.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { authMiddleware } from "../middleware/auth.middleware.js";
-import { upload } from "../middleware/multer.middleware.js";
-import { uploadOnCloudinary } from "../config/cloudinary.js";
+import "./docs/authDocs.js";
 
 const authHandler = Router();
 
